@@ -1,11 +1,221 @@
-<!DOCTYPE html>
-<html lang="en">
+<!--<!DOCTYPE html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <title>Control Arduino Cloud</title>
 </head>
 <body>
-    
+  <h2>Control de LEDs y Mensaje</h2>
+
+  <button onclick="encenderRojo()">Encender LED Rojo</button>
+  <button onclick="encenderVerde()">Encender LED Verde</button>
+  <br><br>
+  <input type="text" id="mensaje" placeholder="Escribe mensaje LCD">
+  <button onclick="enviarMensaje()">Enviar mensaje</button>
+
+  <script>
+    const token = "TU_TOKEN";
+    const thingId = "TU_THING_ID";
+
+    async function actualizarPropiedad(propiedad, valor) {
+      const url = `https://api2.arduino.cc/iot/v2/things/${thingId}/properties/${propiedad}/value`;
+      await fetch(url, {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ value: valor })
+      });
+    }
+
+    function encenderRojo() {
+      actualizarPropiedad("ledRojo", true);
+      actualizarPropiedad("ledVerde", false);
+    }
+
+    function encenderVerde() {
+      actualizarPropiedad("ledRojo", false);
+      actualizarPropiedad("ledVerde", true);
+    }
+
+    function enviarMensaje() {
+      const texto = document.getElementById("mensaje").value;
+      actualizarPropiedad("mensajeLCD", texto);
+    }
+  </script>
+</body>
+</html>-->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Escáner QR</title>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    body {
+      background: linear-gradient(to right, #f8f9fa, #e0f7fa);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    h1 {
+      font-weight: bold;
+    }
+
+    #reader {
+      border: 2px dashed #0d6efd;
+      border-radius: 10px;
+      padding: 10px;
+      background-color: #fff;
+    }
+
+    .lcd-display {
+      background-color: #001100;
+      color: #00FF00;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 1.2rem;
+      padding: 15px;
+      border: 2px solid #00FF00;
+      border-radius: 5px;
+      box-shadow: 0 0 15px #00FF00;
+      text-align: center;
+      position: relative;
+      top: 0;
+      transition: top 1s ease;
+    }
+
+    .bajada {
+      top: 100px;
+    }
+
+    #contenedor {
+     background-image: url('fondo.jpg'); /* Ruta de tu imagen */
+  	background-size: cover; /* O 'contain' para ajustar la imagen */
+  background-position: center; 
+      position: relative;
+      width: 400px;
+      height: 400px;
+      background-color: #f0f0f0;
+      border: 2px solid #ccc;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      margin-top: 30px;
+    }
+
+    #barrera {
+      position: absolute;
+      bottom: 20px;
+      left: 10px;
+      width: 370px;
+      height: 20px;
+      display: flex;
+      transform-origin: left bottom;
+      transition: transform 1s ease;
+    }
+
+    .franja {
+      flex: 1;
+      height: 100%;
+    }
+
+    .roja {
+      background-color: #dc3545;
+    }
+
+    .blanca {
+      background-color: #fff;
+    }
+
+    .abierta {
+      transform: rotate(-90deg);
+    }
+
+    .btn-custom {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container py-5">
+  <h1 class="text-primary text-center mb-4">🔍 Escanea tu código QR</h1>
+
+  <div class="row">
+    <!-- Escáner a la izquierda -->
+    <div class="col-md-6 mb-4 text-center">
+      <div id="reader" class="mx-auto" style="width:360px;"></div>
+    </div>
+
+    <!-- Pantalla LCD y barrera a la derecha -->
+    <div class="col-md-6">
+      <div id="result" class="lcd-display mb-4">Esperando escaneo...</div>
+
+      <div id="contenedor" class="mx-auto">
+        <div id="barrera">
+          <div class="franja roja"></div>
+          <div class="franja blanca"></div>
+          <div class="franja roja"></div>
+        </div>
+       <!-- <button class="btn btn-danger btn-custom d-block mx-auto" onclick="cerrarBarrera()">Cerrar barrera</button>-->
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    function abrirBarrera() {
+      document.getElementById("result").innerText = "✅ Ongi etorri";
+      document.getElementById("barrera").classList.add("abierta");
+
+      setTimeout(() => {
+        cerrarBarrera();
+      }, 5000);
+    }
+
+    function cerrarBarrera() {
+      document.getElementById("result").innerText = "🔒 Barrera cerrada";
+      document.getElementById("barrera").classList.remove("abierta");
+      setTimeout(() => {
+        document.getElementById("result").innerText = "Esperando escaneo...";
+      }, 3000);
+    }
+
+    function onScanSuccess(decodedText, decodedResult) {
+      if (decodedText === "http://www.ictusxp.com") {
+        abrirBarrera();
+      } else {
+        document.getElementById("result").innerText = "❌ Código no válido";
+        setTimeout(() => {
+        document.getElementById("result").innerText = "Esperando escaneo...";
+      }, 3000);
+      }
+    }
+
+    function onScanFailure(error) {
+      // Puedes mostrar errores si lo deseas
+    }
+
+    const html5QrCode = new Html5Qrcode("reader");
+    html5QrCode.start(
+      { facingMode: "environment" },
+      {
+        fps: 10,
+        qrbox: 250
+      },
+      onScanSuccess,
+      onScanFailure
+    );
+  </script>
 </body>
 </html>
+
+
