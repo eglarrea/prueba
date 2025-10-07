@@ -1,51 +1,3 @@
-<!--<!DOCTYPE html>
-<html>
-<head>
-  <title>Control Arduino Cloud</title>
-</head>
-<body>
-  <h2>Control de LEDs y Mensaje</h2>
-
-  <button onclick="encenderRojo()">Encender LED Rojo</button>
-  <button onclick="encenderVerde()">Encender LED Verde</button>
-  <br><br>
-  <input type="text" id="mensaje" placeholder="Escribe mensaje LCD">
-  <button onclick="enviarMensaje()">Enviar mensaje</button>
-
-  <script>
-    const token = "TU_TOKEN";
-    const thingId = "TU_THING_ID";
-
-    async function actualizarPropiedad(propiedad, valor) {
-      const url = `https://api2.arduino.cc/iot/v2/things/${thingId}/properties/${propiedad}/value`;
-      await fetch(url, {
-        method: "PUT",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ value: valor })
-      });
-    }
-
-    function encenderRojo() {
-      actualizarPropiedad("ledRojo", true);
-      actualizarPropiedad("ledVerde", false);
-    }
-
-    function encenderVerde() {
-      actualizarPropiedad("ledRojo", false);
-      actualizarPropiedad("ledVerde", true);
-    }
-
-    function enviarMensaje() {
-      const texto = document.getElementById("mensaje").value;
-      actualizarPropiedad("mensajeLCD", texto);
-    }
-  </script>
-</body>
-</html>-->
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -88,62 +40,11 @@
       transition: top 1s ease;
     }
 
-    .bajada {
-      top: 100px;
-    }
-
-    #contenedor {
-     background-image: url('fondo.jpg'); /* Ruta de tu imagen */
-  	background-size: cover; /* O 'contain' para ajustar la imagen */
-  background-position: center; 
-      position: relative;
-      width: 400px;
-      height: 400px;
-      background-color: #f0f0f0;
-      border: 2px solid #ccc;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.2);
-      margin-top: 30px;
-    }
-
-    #barrera {
-      position: absolute;
-      bottom: 20px;
-      left: 10px;
-      width: 370px;
-      height: 20px;
-      display: flex;
-      transform-origin: left bottom;
-      transition: transform 1s ease;
-    }
-
-    .franja {
-      flex: 1;
-      height: 100%;
-    }
-
-    .roja {
-      background-color: #dc3545;
-    }
-
-    .blanca {
-      background-color: #fff;
-    }
-
-    .abierta {
-      transform: rotate(-90deg);
-    }
-
-    .btn-custom {
-      margin-top: 20px;
-      padding: 10px 20px;
-      font-size: 1rem;
-    }
-    
-    
-    
-    
+   
     .barrier-container {
+      background-image: url('fondo.jpg'); /* Ruta de tu imagen */
+      background-size: cover; /* O 'contain' para ajustar la imagen */
+      background-position: center; 
       position: relative;
       width: 300px;
       height: 200px;
@@ -178,13 +79,6 @@
     .arm.raised {
       transform: rotate(-75deg);
     }
-
-    button {
-      margin-top: 30px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-    }
   </style>
 </head>
 <body>
@@ -196,30 +90,21 @@
     <!-- Escáner a la izquierda -->
     <div class="col-md-6 mb-4 text-center">
       <div id="reader" class="mx-auto" style="width:360px;"></div>
+ 	<div id="result" class="lcd-display mx-auto mb-4 col-md-6">Esperando escaneo...</div>
     </div>
 
     <!-- Pantalla LCD y barrera a la derecha -->
     <div class="col-md-6">
-      <div id="result" class="lcd-display mb-4">Esperando escaneo...</div>
 
-      <div id="contenedor" class="mx-auto">
-        <div id="barrera">
-          <div class="franja roja"></div>
-          <div class="franja blanca"></div>
-          <div class="franja roja"></div>
-        </div>
-       <!-- <button class="btn btn-danger btn-custom d-block mx-auto" onclick="cerrarBarrera()">Cerrar barrera</button>-->
-      </div>
+	<div class="barrier-container">
+	   <div class="pillar"></div>
+	   <div class="arm" id="barrierArm"></div>
+	</div>
     </div>
   </div>
 </div>
 
-<div class="barrier-container">
-    <div class="pillar"></div>
-    <div class="arm" id="barrierArm"></div>
-  </div>
 
-  <button onclick="toggleBarrier()">Subir/Bajar Barrera</button>
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -227,8 +112,7 @@
   <script>
     function abrirBarrera() {
       document.getElementById("result").innerText = "✅ Ongi etorri";
-      document.getElementById("barrera").classList.add("abierta");
-
+      toggleBarrier();
       setTimeout(() => {
         cerrarBarrera();
       }, 5000);
@@ -236,7 +120,7 @@
 
     function cerrarBarrera() {
       document.getElementById("result").innerText = "🔒 Barrera cerrada";
-      document.getElementById("barrera").classList.remove("abierta");
+      toggleBarrier();
       setTimeout(() => {
         document.getElementById("result").innerText = "Esperando escaneo...";
       }, 3000);
