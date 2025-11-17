@@ -149,7 +149,7 @@
     const token = decodedText;
     const idParking = 1;
 
-    fetch("http://localhost:8080/api/public/acceder", {
+    fetch("https://camperapi.onrender.com/api/public/acceder", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ token, idParking })
