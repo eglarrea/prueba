@@ -130,12 +130,11 @@
         onScanFailure
       ).then(() => {
         console.log("Escaneo reanudado");
-
-        // mostrar mensaje solo cuando el escáner ya está activo
-        setTimeout(() => {
-          document.getElementById("result").innerText = "Esperando escaneo...";
-        }, 3000);
       }).catch(err => console.error("Error al reanudar escaneo:", err));
+
+      setTimeout(() => {
+        document.getElementById("result").innerText = "Esperando escaneo...";
+      }, 3000);
     }
 
     function onScanSuccess(decodedText, decodedResult) {
