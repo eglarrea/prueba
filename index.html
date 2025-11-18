@@ -119,22 +119,24 @@
     }
 
     function cerrarBarrera() {
-  document.getElementById("result").innerText = "🔒 Barrera cerrada";
-  toggleBarrier();
+      document.getElementById("result").innerText = "🔒 Barrera cerrada";
+      toggleBarrier();
 
-  // reactivar escaneo después de cerrar
-  html5QrCode.start(
-    { facingMode: "environment" },
-    { fps: 5, qrbox: 250 }, // fps reducido para menos duplicados
-    onScanSuccess,
-    onScanFailure
-  ).then(() => {
-    console.log("Escaneo reanudado");
-    setTimeout(() => {
-      document.getElementById("result").innerText = "Esperando escaneo...";
-    }, 3000);
-  }).catch(err => console.error("Error al reanudar escaneo:", err));
-}
+      // reactivar escaneo después de cerrar
+      html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 5, qrbox: 250 }, // fps reducido para menos duplicados
+        onScanSuccess,
+        onScanFailure
+      ).then(() => {
+        console.log("Escaneo reanudado");
+
+        // mostrar mensaje solo cuando el escáner ya está activo
+        setTimeout(() => {
+          document.getElementById("result").innerText = "Esperando escaneo...";
+        }, 3000);
+      }).catch(err => console.error("Error al reanudar escaneo:", err));
+    }
 
     function onScanSuccess(decodedText, decodedResult) {
       if (processing) return; // ignorar si ya se está procesando
