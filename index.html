@@ -105,6 +105,14 @@ header .logo {
     .arm.raised {
       transform: rotate(-75deg);
     }
+	
+	.lcd-display.flash {
+		animation: flash 0.5s alternate 3;
+	}
+	@keyframes flash {
+		from { opacity: 1; }
+		to { opacity: 0.2; }
+	}
   </style>
 </head>
 <body>
@@ -178,7 +186,10 @@ header .logo {
 
       const token = decodedText;
       const idParking = document.getElementById("parkingId").value;
-      console.log(idParking);
+	  const lcd = document.getElementById("result");
+	  lcd.classList.add("flash");
+	  setTimeout(() => lcd.classList.remove("flash"), 1500);
+      
       fetch("https://camperapi.onrender.com/api/public/acceder", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
