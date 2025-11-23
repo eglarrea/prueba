@@ -1,31 +1,57 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Escáner QR</title>
-  <script src="https://unpkg.com/html5-qrcode"></script>
-
-  <!-- Bootstrap CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Lector QR</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  
   <style>
+    :root { color-scheme: light dark; }
     body {
-      background: linear-gradient(to right, #f8f9fa, #e0f7fa);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      margin: 0; padding: 24px; background: #0f1115; color: #e8eaed;
     }
+	header {
+  display: flex;              /* coloca los hijos en fila */
+  align-items: center;        /* alinea verticalmente */
+  gap: 16px;                  /* espacio entre imagen y texto */
+}
 
-    h1 {
-      font-weight: bold;
+header .logo {
+  width: 220px;               /* ajusta tamaño */
+  height: auto;               /* mantiene proporción */
+}
+    .container {
+      max-width: 880px; margin: 0 auto;
+      display: grid; gap: 16px;
+      grid-template-columns: 1.2fr 1fr;
     }
-
-    #reader {
-      border: 2px dashed #0d6efd;
-      border-radius: 10px;
-      padding: 10px;
-      background-color: #fff;
+    header { margin-bottom: 16px; }
+    h1 { font-size: 1.6rem; margin: 0 0 8px; }
+    .card {
+      background: #1a1f29; border: 1px solid #263042; border-radius: 12px;
+      padding: 16px; box-shadow: 0 6px 20px rgba(0,0,0,.25);
     }
-
-    .lcd-display {
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+    button, select, input[type="file"] {
+      background: #243041; color: #e8eaed; border: 1px solid #3a4a63;
+      padding: 10px 12px; border-radius: 8px; cursor: pointer; font-weight: 600;
+    }
+    button.primary { background: #2d5cf6; border-color: #2d5cf6; }
+    button:disabled { opacity: .6; cursor: not-allowed; }
+    #reader { width: 100%; min-height: 320px; border-radius: 10px; overflow: hidden; }
+    .status { font-size: .95rem; opacity: .9; }
+    .result {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      background: #11161f; border: 1px dashed #334155; border-radius: 10px;
+      padding: 12px; white-space: pre-wrap; word-break: break-word;
+    }
+    .hint { font-size: .9rem; opacity: .75; }
+    .badge { display: inline-block; background: #1f2937; border: 1px solid #334155;
+      padding: 4px 8px; border-radius: 999px; font-size: .8rem; }
+	  
+	.lcd-display {
       background-color: #001100;
       color: #00FF00;
       font-family: 'Courier New', Courier, monospace;
@@ -40,9 +66,10 @@
       transition: top 1s ease;
     }
 
+   
     .barrier-container {
       background-image: url('fondo.jpg'); /* Ruta de tu imagen */
-      background-size: cover;
+      background-size: cover; /* O 'contain' para ajustar la imagen */
       background-position: center; 
       position: relative;
       width: 300px;
@@ -81,30 +108,33 @@
   </style>
 </head>
 <body>
+<header>
+  <img src="Logo.png" height="100rem" width="100rem" alt="Descripción de la imagen" class="logo">
+  <div>
+    <h1>Acceso al área</h1>
+    <input type="number" value="1" id="parkingId"/> 
+  </div>
+</header>
 
-  <div class="container py-5">
-    <h1 class="text-primary text-center mb-4">🔍 Escanea tu código QR</h1>
+  <div class="container">
+    <section class="card">
+      <div id="reader"></div>
+    </section>
 
-    <div class="row">
-      <!-- Escáner a la izquierda -->
-      <div class="col-md-6 mb-4 text-center">
-        <div id="reader" class="mx-auto" style="width:360px;"></div>
-        <div id="result" class="lcd-display mx-auto mb-4 col-md-6">Esperando escaneo...</div>
-      </div>
-
-      <!-- Pantalla LCD y barrera a la derecha -->
-      <div class="col-md-6">
-        <div class="barrier-container">
-          <div class="pillar"></div>
-          <div class="arm" id="barrierArm"></div>
-        </div>
-      </div>
-    </div>
+    <aside class="card">
+	  <div id="result" class="lcd-display mx-auto mb-4 col-md-6">Esperando escaneo...</div>
+      <p class="hint">Consejo: Acerca el QR, evita reflejos y mantén el enfoque.</p>
+	  <div class="barrier-container">
+	   <div class="pillar"></div>
+	   <div class="arm" id="barrierArm"></div>
+	</div>
+    </aside>
   </div>
 
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Librería html5-qrcode desde CDN -->
+   <script src="https://unpkg.com/html5-qrcode"></script>
 
+  
   <script>
     let html5QrCode; 
     let processing = false; // flag para evitar lecturas duplicadas
@@ -147,8 +177,8 @@
       processing = true;
 
       const token = decodedText;
-      const idParking = 1;
-
+      const idParking = document.getElementById("parkingId").value;
+      console.log(idParking);
       fetch("https://camperapi.onrender.com/api/public/acceder", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -191,6 +221,5 @@
       arm.classList.toggle('raised');
     }
   </script>
-
 </body>
 </html>
